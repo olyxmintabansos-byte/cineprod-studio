@@ -1,7 +1,17 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { SceneItem, CastCallMember, ShootDayMeta, CineContextType, SceneStatus } from '@/types/cine';
+import {
+  SceneItem,
+  CastCallMember,
+  ShootDayMeta,
+  CineContextType,
+  SceneStatus,
+  DailiesClip,
+  CrewMember,
+  LutPreset,
+  CrewStatus
+} from '@/types/cine';
 
 const DEFAULT_META: ShootDayMeta = {
   dayNumber: 28,
@@ -154,12 +164,212 @@ const DEFAULT_CAST: CastCallMember[] = [
   },
 ];
 
+const DEFAULT_DAILIES: DailiesClip[] = [
+  {
+    id: 'dl-1',
+    roll: 'A-01',
+    scene: '42A',
+    take: 1,
+    duration: '00:01:42:12',
+    timecodeIn: '10:14:02:00',
+    timecodeOut: '10:15:44:12',
+    lens: 'Cooke Anamorphic 40mm',
+    fps: 24,
+    isCircleTake: false,
+    directorNote: 'False start on subway door mechanism. Camera operator adjusted framing.',
+    lutApplied: 'ARRI_709',
+    soundRoll: 'SR-04',
+    audioSync: 'LOCKED',
+    cameraCard: 'CFexpress Mag 1 (Stage 4)',
+    aperture: 'T2.8',
+    iso: 800,
+  },
+  {
+    id: 'dl-2',
+    roll: 'A-01',
+    scene: '42A',
+    take: 3,
+    duration: '00:02:18:04',
+    timecodeIn: '10:28:11:00',
+    timecodeOut: '10:30:29:04',
+    lens: 'Cooke Anamorphic 40mm',
+    fps: 24,
+    isCircleTake: true,
+    directorNote: 'Master take! Incredible intensity when Marcus grasps the cassette. Send to editorial immediately.',
+    lutApplied: 'NOIR_HICON',
+    soundRoll: 'SR-04',
+    audioSync: 'LOCKED',
+    cameraCard: 'CFexpress Mag 1',
+    aperture: 'T2.0',
+    iso: 800,
+  },
+  {
+    id: 'dl-3',
+    roll: 'B-04',
+    scene: '43',
+    take: 1,
+    duration: '00:03:04:18',
+    timecodeIn: '16:42:00:10',
+    timecodeOut: '16:45:04:28',
+    lens: 'Arri Signature Prime 85mm',
+    fps: 24,
+    isCircleTake: false,
+    directorNote: 'Good natural sunset flare, but wind gust clipped audio channel 2 on Pier 17.',
+    lutApplied: 'KODAK_2383',
+    soundRoll: 'SR-05',
+    audioSync: 'DRIFT_DETECTED',
+    cameraCard: 'CFexpress Mag 2',
+    aperture: 'T1.8',
+    iso: 400,
+  },
+  {
+    id: 'dl-4',
+    roll: 'B-04',
+    scene: '43',
+    take: 2,
+    duration: '00:02:45:00',
+    timecodeIn: '17:02:14:00',
+    timecodeOut: '17:04:59:00',
+    lens: 'Arri Signature Prime 85mm',
+    fps: 24,
+    isCircleTake: true,
+    directorNote: 'Stunning magic hour color. Elena silhouette against East River wharf is cinematic perfection.',
+    lutApplied: 'TEAL_ORANGE',
+    soundRoll: 'SR-05',
+    audioSync: 'LOCKED',
+    cameraCard: 'CFexpress Mag 2',
+    aperture: 'T2.0',
+    iso: 500,
+  },
+  {
+    id: 'dl-5',
+    roll: 'C-02',
+    scene: '44',
+    take: 1,
+    duration: '00:01:12:00',
+    timecodeIn: '19:15:30:00',
+    timecodeOut: '19:16:42:00',
+    lens: 'Zeiss Master Prime 35mm',
+    fps: 48,
+    isCircleTake: false,
+    directorNote: 'High-speed 48fps stunt run. Breakaway glass did not shatter cleanly on cue.',
+    lutApplied: 'BLEACH_BYPASS',
+    soundRoll: 'SR-06',
+    audioSync: 'WILD_TRACK',
+    cameraCard: 'CFexpress Mag 3',
+    aperture: 'T2.8',
+    iso: 1600,
+  },
+];
+
+const DEFAULT_CREW: CrewMember[] = [
+  {
+    id: 'cr-1',
+    name: 'Elena Chen, ASC',
+    department: 'CAMERA',
+    role: 'Director of Photography (DOP)',
+    callTime: '05:15 AM',
+    phone: '+1 (555) 492-8812',
+    walkieChannel: 3,
+    status: 'ON_STAGE',
+    perDiemStatus: 'APPROVED',
+    badgeId: 'CP-DOP-01',
+  },
+  {
+    id: 'cr-2',
+    name: 'Theo Brauer',
+    department: 'CAMERA',
+    role: '1st Assistant Camera (A-Cam Focus Puller)',
+    callTime: '05:15 AM',
+    phone: '+1 (555) 381-9902',
+    walkieChannel: 3,
+    status: 'ON_STAGE',
+    perDiemStatus: 'APPROVED',
+    badgeId: 'CP-CAM-02',
+  },
+  {
+    id: 'cr-3',
+    name: 'Ronan Gallagher',
+    department: 'SOUND',
+    role: 'Production Sound Mixer',
+    callTime: '05:30 AM',
+    phone: '+1 (555) 714-2201',
+    walkieChannel: 4,
+    status: 'ON_STAGE',
+    perDiemStatus: 'APPROVED',
+    badgeId: 'CP-SND-01',
+  },
+  {
+    id: 'cr-4',
+    name: 'Maya Kowalski',
+    department: 'LIGHTING',
+    role: 'Chief Lighting Technician (Gaffer)',
+    callTime: '05:00 AM',
+    phone: '+1 (555) 890-4133',
+    walkieChannel: 2,
+    status: 'ON_STAGE',
+    perDiemStatus: 'APPROVED',
+    badgeId: 'CP-LTG-01',
+  },
+  {
+    id: 'cr-5',
+    name: 'Declan Hayes',
+    department: 'GRIP',
+    role: 'Key Grip / Technocrane Operator',
+    callTime: '05:00 AM',
+    phone: '+1 (555) 233-8719',
+    walkieChannel: 2,
+    status: 'ON_STAGE',
+    perDiemStatus: 'APPROVED',
+    badgeId: 'CP-GRP-01',
+  },
+  {
+    id: 'cr-6',
+    name: 'Chloe Laurent',
+    department: 'ART',
+    role: 'Production Designer & Props Master',
+    callTime: '06:00 AM',
+    phone: '+1 (555) 604-1188',
+    walkieChannel: 1,
+    status: 'PREPPING',
+    perDiemStatus: 'APPROVED',
+    badgeId: 'CP-ART-01',
+  },
+  {
+    id: 'cr-7',
+    name: 'Kofi Mensah',
+    department: 'PRODUCTION',
+    role: 'Unit Production Manager (UPM)',
+    callTime: '04:45 AM',
+    phone: '+1 (555) 912-3344',
+    walkieChannel: 1,
+    status: 'ON_STAGE',
+    perDiemStatus: 'APPROVED',
+    badgeId: 'CP-UPM-01',
+  },
+  {
+    id: 'cr-8',
+    name: 'Sabrina Vega',
+    department: 'WARDROBE',
+    role: 'Key Costume Supervisor',
+    callTime: '05:30 AM',
+    phone: '+1 (555) 441-2809',
+    walkieChannel: 1,
+    status: 'EN_ROUTE',
+    perDiemStatus: 'PENDING',
+    badgeId: 'CP-WRD-01',
+  },
+];
+
 const CineContext = createContext<CineContextType | undefined>(undefined);
 
 export function CineProvider({ children }: { children: React.ReactNode }) {
-  const [meta] = useState<ShootDayMeta>(DEFAULT_META);
+  const [meta, setMeta] = useState<ShootDayMeta>(DEFAULT_META);
   const [scenes, setScenes] = useState<SceneItem[]>(DEFAULT_SCENES);
   const [castMembers, setCastMembers] = useState<CastCallMember[]>(DEFAULT_CAST);
+  const [dailiesClips, setDailiesClips] = useState<DailiesClip[]>(DEFAULT_DAILIES);
+  const [crewMembers, setCrewMembers] = useState<CrewMember[]>(DEFAULT_CREW);
+  const [activeSceneId, setActiveSceneId] = useState<string>('sc-2');
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'INT' | 'EXT' | 'NIGHT' | 'DAY'>('ALL');
   const [timecode, setTimecode] = useState<string>('14:32:08:16');
   const [activeSlate, setActiveSlate] = useState({
@@ -172,6 +382,7 @@ export function CineProvider({ children }: { children: React.ReactNode }) {
     kelvin: 5600,
   });
 
+  // Load from LocalStorage
   useEffect(() => {
     try {
       const stored = localStorage.getItem('cineprod_state_v1');
@@ -179,20 +390,28 @@ export function CineProvider({ children }: { children: React.ReactNode }) {
         const parsed = JSON.parse(stored);
         if (parsed.scenes) setScenes(parsed.scenes);
         if (parsed.castMembers) setCastMembers(parsed.castMembers);
+        if (parsed.dailiesClips) setDailiesClips(parsed.dailiesClips);
+        if (parsed.crewMembers) setCrewMembers(parsed.crewMembers);
         if (parsed.activeSlate) setActiveSlate(parsed.activeSlate);
       }
-    } catch {}
+    } catch {
+      // LocalStorage fallback
+    }
   }, []);
 
+  // Save to LocalStorage
   useEffect(() => {
     try {
       localStorage.setItem(
         'cineprod_state_v1',
-        JSON.stringify({ scenes, castMembers, activeSlate })
+        JSON.stringify({ scenes, castMembers, dailiesClips, crewMembers, activeSlate })
       );
-    } catch {}
-  }, [scenes, castMembers, activeSlate]);
+    } catch {
+      // ignore
+    }
+  }, [scenes, castMembers, dailiesClips, crewMembers, activeSlate]);
 
+  // Live Timecode simulator
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
@@ -201,7 +420,7 @@ export function CineProvider({ children }: { children: React.ReactNode }) {
       const s = String(now.getSeconds()).padStart(2, '0');
       const f = String(Math.floor((now.getMilliseconds() / 1000) * 24)).padStart(2, '0');
       setTimecode(`${h}:${m}:${s}:${f}`);
-    }, 41);
+    }, 41); // ~24 fps ticker
     return () => clearInterval(timer);
   }, []);
 
@@ -225,6 +444,28 @@ export function CineProvider({ children }: { children: React.ReactNode }) {
     setScenes((prev) => [...prev, created]);
   };
 
+  const toggleCircleTake = (clipId: string) => {
+    setDailiesClips((prev) =>
+      prev.map((c) => (c.id === clipId ? { ...c, isCircleTake: !c.isCircleTake } : c))
+    );
+  };
+
+  const setClipLut = (clipId: string, lut: LutPreset) => {
+    setDailiesClips((prev) =>
+      prev.map((c) => (c.id === clipId ? { ...c, lutApplied: lut } : c))
+    );
+  };
+
+  const updateCrewStatus = (id: string, status: CrewStatus) => {
+    setCrewMembers((prev) =>
+      prev.map((cr) => (cr.id === id ? { ...cr, status } : cr))
+    );
+  };
+
+  const broadcastCallAlert = (customMessage: string) => {
+    alert(`[RADIO CHANNEL 1 PRODUCTION BROADCAST]\nTo: ALL DEPARTMENTS\nMessage: ${customMessage}\nBroadcast Time: ${timecode}`);
+  };
+
   const incrementTake = () => {
     setActiveSlate((prev) => ({
       ...prev,
@@ -246,13 +487,19 @@ export function CineProvider({ children }: { children: React.ReactNode }) {
         meta,
         scenes,
         castMembers,
-        activeSceneId: 'sc-2',
+        dailiesClips,
+        crewMembers,
+        activeSceneId,
         timecode,
         activeFilter,
         setActiveFilter,
         updateSceneStatus,
         updateCastStatus,
         addScene,
+        toggleCircleTake,
+        setClipLut,
+        updateCrewStatus,
+        broadcastCallAlert,
         activeSlate,
         incrementTake,
         setSlateScene,
